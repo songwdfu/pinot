@@ -70,6 +70,7 @@ public class PinotQueryRuleSets {
 
       // join rules
       CoreRules.JOIN_PUSH_EXPRESSIONS,
+      CoreRules.JOIN_PUSH_TRANSITIVE_PREDICATES,
 
       // join and semi-join rules
       CoreRules.PROJECT_TO_SEMI_JOIN,
@@ -77,13 +78,19 @@ public class PinotQueryRuleSets {
 
       // convert non-all union into all-union + distinct
       CoreRules.UNION_TO_DISTINCT,
-
+      // aggregate join remove
+      CoreRules.AGGREGATE_JOIN_REMOVE,
       // remove aggregation if it does not aggregate and input is already distinct
       CoreRules.AGGREGATE_REMOVE,
-      // push aggregate through join
-      CoreRules.AGGREGATE_JOIN_TRANSPOSE,
+      // also push aggregate function through join
+      CoreRules.AGGREGATE_JOIN_TRANSPOSE_EXTENDED,
       // aggregate union rule
       CoreRules.AGGREGATE_UNION_AGGREGATE,
+      // push aggregate through join
+      // this one won't be useful because it requires empty aggCalls,
+      // these will be removed by AGGREGATE_REMOVE
+      CoreRules.AGGREGATE_JOIN_TRANSPOSE,
+
 
       // reduce SUM and AVG
       // TODO: Consider not reduce at all.
