@@ -75,6 +75,10 @@ public class PinotQueryRuleSets {
       CoreRules.PROJECT_TO_SEMI_JOIN,
       PinotSeminJoinDistinctProjectRule.INSTANCE,
 
+      // NOTE: moved transitive predicates push rule down here
+      // to consider semijoin optimizations first
+      CoreRules.JOIN_PUSH_TRANSITIVE_PREDICATES,
+
       // convert non-all union into all-union + distinct
       CoreRules.UNION_TO_DISTINCT,
 
@@ -118,6 +122,8 @@ public class PinotQueryRuleSets {
       CoreRules.FILTER_MERGE,
       CoreRules.AGGREGATE_REMOVE,
       CoreRules.SORT_REMOVE,
+      PruneEmptyRules.CORRELATE_LEFT_INSTANCE,
+      PruneEmptyRules.CORRELATE_RIGHT_INSTANCE,
       PruneEmptyRules.AGGREGATE_INSTANCE,
       PruneEmptyRules.FILTER_INSTANCE,
       PruneEmptyRules.JOIN_LEFT_INSTANCE,
