@@ -41,6 +41,7 @@ import org.apache.pinot.query.planner.plannode.PlanNode;
 import org.apache.pinot.query.planner.plannode.ProjectNode;
 import org.apache.pinot.query.routing.QueryServerInstance;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -133,6 +134,86 @@ public class QueryCompilationTest extends QueryEnvironmentTestBase {
     assertEquals(explain,
         "Execution Plan\n"
             + "LogicalValues(tuples=[[]])\n");
+    //@formatter:on
+  }
+
+  @Test
+  public void testJoinPushTransitivePredicate() {
+    // queries involving extra predicate on join keys
+    // should be optimized to push the predicate to both sides of the join if applicable
+    String query = "EXPLAIN PLAN FOR\n"
+        + "SELECT * FROM a\n"
+        + "JOIN b\n"
+        + "ON a.col1 = b.col1\n"
+        + "WHERE a.col1 = 1;\n";
+
+    String explain = _queryEnvironment.explainQuery(query, RANDOM_REQUEST_ID_GEN.nextLong());
+    //@formatter:off
+    assertEquals(explain,
+        "Execution Plan\n"
+            + "LogicalJoin(condition=[=($0, $9)], joinType=[inner])\n"
+            + "  PinotLogicalExchange(distribution=[hash[0]])\n"
+            + "    LogicalFilter(condition=[=(CAST($0):INTEGER NOT NULL, 1)])\n"
+            + "      PinotLogicalTableScan(table=[[default, a]])\n"
+            + "  PinotLogicalExchange(distribution=[hash[0]])\n"
+            + "    LogicalFilter(condition=[=(CAST($0):INTEGER NOT NULL, 1)])\n"
+            + "      PinotLogicalTableScan(table=[[default, b]])\n");
+    //@formatter:on
+  }
+
+  @Ignore("This test requires PRUNE_RULES before BASIC_RULES to pass, however enabling that"
+      + "introduces changes that ~50 hardcoded plans in ResourceBasedQueriesTest would change."
+      + "It is also needed to investigate why there would be redundant Project and Exchange"
+      + "when the extra pruning is enabled")
+  @Test
+  public void testAggregateJoinRemove() {
+    // queries where join is left or right join and the aggregate above it has no aggCall
+    // or all aggCalls are DISTINCT
+    // should be optimized to remove the join completely
+    String query = "EXPLAIN PLAN FOR\n"
+        + "SELECT a.col1, COUNT(DISTINCT a.col3) \n"
+        + "FROM a \n"
+        + "LEFT JOIN b ON a.col2 = b.col2\n"
+        + "GROUP BY a.col1;";
+
+    String explain = _queryEnvironment.explainQuery(query, RANDOM_REQUEST_ID_GEN.nextLong());
+    //@formatter:off
+    assertEquals(explain,
+    "Execution Plan\n"
+        + "PinotLogicalAggregate(group=[{0}], agg#0=[DISTINCTCOUNT($1)], aggType=[FINAL])\n"
+        + "  PinotLogicalExchange(distribution=[hash[0]])\n"
+        + "    PinotLogicalAggregate(group=[{0}], agg#0=[DISTINCTCOUNT($2)], aggType=[LEAF])\n"
+        + "      PinotLogicalTableScan(table=[[default, a]])\n");
+    //@formatter:on
+  }
+
+  @Test
+  public void testAggregateJoinPushdownFunctionsDisabledByDefault() {
+    // Test this rule is disabled by default.
+    // queries where the aggCalls in aggregation above join is splitable could be
+    // duplicated down the join, in specific scenario the above aggregate could be
+    // completely removed.
+    String query = "EXPLAIN PLAN FOR \n"
+        + "SELECT SUM(a.col1)\n"
+        + "FROM b INNER JOIN a\n"
+        + "ON b.col2 = a.col2\n"
+        + "GROUP BY b.col2, a.col2";
+
+    String explain = _queryEnvironment.explainQuery(query, RANDOM_REQUEST_ID_GEN.nextLong());
+    //@formatter:off
+    assertEquals(explain,
+        "Execution Plan\n"
+            + "LogicalProject(EXPR$0=[$2])\n"
+            + "  PinotLogicalAggregate(group=[{0, 1}], agg#0=[$SUM0($2)], aggType=[FINAL])\n"
+            + "    PinotLogicalExchange(distribution=[hash[0, 1]])\n"
+            + "      PinotLogicalAggregate(group=[{0, 1}], agg#0=[$SUM0($2)], aggType=[LEAF])\n"
+            + "        LogicalJoin(condition=[=($0, $1)], joinType=[inner])\n"
+            + "          PinotLogicalExchange(distribution=[hash[0]])\n"
+            + "            LogicalProject(col2=[$1])\n"
+            + "              PinotLogicalTableScan(table=[[default, b]])\n"
+            + "          PinotLogicalExchange(distribution=[hash[0]])\n"
+            + "            LogicalProject(col2=[$1], $f2=[CAST($0):DECIMAL(2000, 1000) NOT NULL])\n"
+            + "              PinotLogicalTableScan(table=[[default, a]])\n");
     //@formatter:on
   }
 

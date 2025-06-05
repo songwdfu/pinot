@@ -119,9 +119,14 @@ public class PlannerContext implements AutoCloseable {
           continue;
         }
         // the class name
+        // by default, we disable AggregateJoinTransposeRule.EXTENDED
         String ruleName = (String) declaredField.get(null);
+        boolean defaultDisabled = false;
+        if (ruleName.equals(CommonConstants.Broker.PlannerRules.AGGREGATE_JOIN_TRANSPOSE_EXTENDED)) {
+          defaultDisabled = true;
+        }
         // check if rule is disabled, put {className, false} if is disabled
-        if (isRuleDisabled(CommonConstants.Broker.PLANNER_RULE_SKIP + ruleName, false, options)) {
+        if (isRuleDisabled(CommonConstants.Broker.PLANNER_RULE_SKIP + ruleName, defaultDisabled, options)) {
           ruleFlags.put(ruleName, false);
         }
       }

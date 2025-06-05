@@ -70,11 +70,14 @@ public class PinotQueryRuleSets {
 
       // join rules
       CoreRules.JOIN_PUSH_EXPRESSIONS,
-      CoreRules.JOIN_PUSH_TRANSITIVE_PREDICATES,
 
       // join and semi-join rules
       CoreRules.PROJECT_TO_SEMI_JOIN,
       PinotSeminJoinDistinctProjectRule.INSTANCE,
+
+      // NOTE: moved transitive predicates push rule down here
+      // to consider semijoin optimizations first
+      CoreRules.JOIN_PUSH_TRANSITIVE_PREDICATES,
 
       // convert non-all union into all-union + distinct
       CoreRules.UNION_TO_DISTINCT,

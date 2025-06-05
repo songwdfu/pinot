@@ -708,6 +708,10 @@ public class CommonConstants {
               SKIP + PlannerRules.FILTER_MERGE;
           public static final String SKIP_SORT_REMOVE_RULE =
               SKIP + PlannerRules.SORT_REMOVE;
+          public static final String SKIP_JOIN_PUSH_TRANSITIVE_PREDICATES_RULE =
+              SKIP + PlannerRules.JOIN_PUSH_TRANSITIVE_PREDICATES;
+          public static final String SKIP_AGGREGATE_JOIN_REMOVE_RULE =
+              SKIP + PlannerRules.AGGREGATE_JOIN_REMOVE;
           public static final String SKIP_PRUNE_EMPTY_CORRELATE_LEFT_RULE =
               SKIP + PlannerRules.PRUNE_EMPTY_CORRELATE_LEFT;
           public static final String SKIP_PRUNE_EMPTY_CORRELATE_RIGHT_RULE =
@@ -769,6 +773,8 @@ public class CommonConstants {
       public static final String AGGREGATE_PROJECT_MERGE = "AggregateProjectMergeRule";
       public static final String FILTER_MERGE = "FilterMergeRule";
       public static final String SORT_REMOVE = "SortRemoveRule";
+      public static final String JOIN_PUSH_TRANSITIVE_PREDICATES = "JoinPushTransitivePredicatesRule";
+      public static final String AGGREGATE_JOIN_REMOVE = "AggregateJoinRemoveRule";
       // this is config-based
       public static final String AGGREGATE_JOIN_TRANSPOSE_EXTENDED = "AggregateJoinTransposeRuleExtended";
       // following PruneEmptyRules are config-based
