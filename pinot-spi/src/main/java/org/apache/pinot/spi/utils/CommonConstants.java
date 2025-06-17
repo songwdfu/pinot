@@ -689,6 +689,8 @@ public class CommonConstants {
       public static final String PRUNE_EMPTY_CORRELATE_RIGHT = "PruneEmptyCorrelateRight";
       public static final String PRUNE_EMPTY_JOIN_LEFT = "PruneEmptyJoinLeft";
       public static final String PRUNE_EMPTY_JOIN_RIGHT = "PruneEmptyJoinRight";
+      public static final String SORT_JOIN_COPY = "SortJoinCopyRule";
+      public static final String SORT_JOIN_TRANSPOSE = "SortJoinTransposeRule";
     }
     public static final String PLANNER_RULE_SKIP = "skipRule";
     public static String skipRule(String ruleString) {

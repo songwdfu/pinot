@@ -40,10 +40,13 @@ import org.apache.calcite.rel.rules.ProjectToWindowRule;
 import org.apache.calcite.rel.rules.ProjectWindowTransposeRule;
 import org.apache.calcite.rel.rules.PruneEmptyRules;
 import org.apache.calcite.rel.rules.SemiJoinRule;
+import org.apache.calcite.rel.rules.SortJoinCopyRule;
+import org.apache.calcite.rel.rules.SortJoinTransposeRule;
 import org.apache.calcite.rel.rules.SortRemoveRule;
 import org.apache.calcite.rel.rules.UnionToDistinctRule;
 import org.apache.pinot.calcite.rel.rules.PinotFilterJoinRule.PinotFilterIntoJoinRule;
 import org.apache.pinot.calcite.rel.rules.PinotFilterJoinRule.PinotJoinConditionPushRule;
+import org.apache.pinot.core.plan.Plan;
 import org.apache.pinot.spi.utils.CommonConstants.Broker.PlannerRuleNames;
 
 
@@ -100,6 +103,10 @@ public class PinotQueryRuleSets {
 
       // sort join rules
       // TODO: evaluate the SORT_JOIN_TRANSPOSE and SORT_JOIN_COPY rules
+      SortJoinCopyRule.Config.DEFAULT
+              .withDescription(PlannerRuleNames.SORT_JOIN_COPY).toRule(),
+      SortJoinTransposeRule.Config.DEFAULT
+              .withDescription(PlannerRuleNames.SORT_JOIN_TRANSPOSE).toRule(),
 
       // join rules
       JoinPushExpressionsRule.Config.DEFAULT
